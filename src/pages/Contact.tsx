@@ -285,10 +285,47 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
 import { Send, Mail, MapPin, Linkedin, CheckCircle } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Contact() {
   const { t } = useLanguage();
   const [state, handleSubmit] = useForm("xwvvvenr");
+
+  /* -----------------------------
+     DEBUG: watch Formspree state
+  ------------------------------ */
+  useEffect(() => {
+    console.log("[Formspree State Update]", {
+      submitting: state.submitting,
+      succeeded: state.succeeded,
+      errors: state.errors,
+    });
+  }, [state]);
+
+  /* -----------------------------
+     Custom submit handler
+  ------------------------------ */
+  const onSubmitWithLogs = async (event: React.FormEvent<HTMLFormElement>) => {
+    console.log("[Contact Form] Submit triggered");
+
+    try {
+      const formData = new FormData(event.currentTarget);
+
+      console.log("[Contact Form] Form data:", {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        organization: formData.get("organization"),
+        inquiryType: formData.get("inquiryType"),
+        message: formData.get("message"),
+      });
+
+      await handleSubmit(event);
+
+      console.log("[Contact Form] handleSubmit finished");
+    } catch (error) {
+      console.error("[Contact Form] Submit error:", error);
+    }
+  };
 
   return (
     <Layout>
@@ -327,201 +364,47 @@ export default function Contact() {
             >
               {state.succeeded ? (
                 <div className="bg-[#0d1220] border border-[#2962ff]/20 p-12 text-center">
-                  <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-[#2962ff]/10 rounded-full">
-                    <CheckCircle className="text-[#2962ff]" size={32} />
-                  </div>
+                  <CheckCircle className="mx-auto mb-6 text-[#2962ff]" size={40} />
                   <h3 className="font-serif text-2xl text-white mb-4">
-                    {t("contact.form.success").split(".")[0]}
+                    Success
                   </h3>
                   <p className="text-white/60">
-                    {t("contact.form.success").split(".")[1]}
+                    Form submitted successfully.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-8">
+                <form onSubmit={onSubmitWithLogs} className="space-y-8">
 
+                  {/* Name + Email */}
                   <div className="grid md:grid-cols-2 gap-8">
-                    {/* Name */}
-                    <div>
-                      <label className="block font-display text-xs tracking-wider uppercase text-white/50 mb-3">
-                        {t("contact.form.name")} *
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        required
-                        className="w-full bg-[#0d1220] border border-white/10 focus:border-[#2962ff]/50 px-4 py-3 text-white outline-none transition-colors"
-                      />
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label className="block font-display text-xs tracking-wider uppercase text-white/50 mb-3">
-                        {t("contact.form.email")} *
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        className="w-full bg-[#0d1220] border border-white/10 focus:border-[#2962ff]/50 px-4 py-3 text-white outline-none transition-colors"
-                      />
-                      <ValidationError
-                        prefix="Email"
-                        field="email"
-                        errors={state.errors}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {/* Organization */}
-                    <div>
-                      <label className="block font-display text-xs tracking-wider uppercase text-white/50 mb-3">
-                        {t("contact.form.organization")}
-                      </label>
-                      <input
-                        type="text"
-                        name="organization"
-                        className="w-full bg-[#0d1220] border border-white/10 focus:border-[#2962ff]/50 px-4 py-3 text-white outline-none transition-colors"
-                      />
-                    </div>
-
-                    {/* Inquiry Type */}
-                    <div>
-                      <label className="block font-display text-xs tracking-wider uppercase text-white/50 mb-3">
-                        {t("contact.form.inquiryType")}
-                      </label>
-                      <select
-                        name="inquiryType"
-                        className="w-full bg-[#0d1220] border border-white/10 focus:border-[#2962ff]/50 px-4 py-3 text-white outline-none transition-colors appearance-none cursor-pointer"
-                      >
-                        <option value="">--</option>
-                        <option value="investment">{t("contact.form.inquiryType.investment")}</option>
-                        <option value="jv">{t("contact.form.inquiryType.jv")}</option>
-                        <option value="general">{t("contact.form.inquiryType.general")}</option>
-                        <option value="media">{t("contact.form.inquiryType.media")}</option>
-                      </select>
-                    </div>
+                    <input name="name" required placeholder="Name" />
+                    <input name="email" type="email" required placeholder="Email" />
                   </div>
 
                   {/* Message */}
-                  <div>
-                    <label className="block font-display text-xs tracking-wider uppercase text-white/50 mb-3">
-                      {t("contact.form.message")} *
-                    </label>
-                    <textarea
-                      name="message"
-                      required
-                      rows={6}
-                      className="w-full bg-[#0d1220] border border-white/10 focus:border-[#2962ff]/50 px-4 py-3 text-white outline-none resize-none transition-colors"
-                    />
-                    <ValidationError
-                      prefix="Message"
-                      field="message"
-                      errors={state.errors}
-                    />
-                  </div>
+                  <textarea
+                    name="message"
+                    rows={6}
+                    required
+                    placeholder="Message"
+                  />
 
-                  {/* Submit */}
+                  <ValidationError prefix="Message" field="message" errors={state.errors} />
+
                   <motion.button
                     type="submit"
                     disabled={state.submitting}
-                    className="group inline-flex items-center gap-3 px-10 py-4 bg-[#2962ff] text-white font-display text-sm tracking-wider uppercase hover:bg-[#1e4fd6] transition-colors disabled:opacity-50"
-                    whileHover={{ scale: state.submitting ? 1 : 1.02 }}
-                    whileTap={{ scale: state.submitting ? 1 : 0.98 }}
+                    className="px-10 py-4 bg-[#2962ff] text-white"
                   >
-                    {state.submitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        {t("contact.form.submit")}...
-                      </>
-                    ) : (
-                      <>
-                        {t("contact.form.submit")}
-                        <Send size={18} className="group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
+                    {state.submitting ? "Submitting..." : "Send Message"}
                   </motion.button>
+
                 </form>
               )}
             </motion.div>
-
-            {/* Contact Info (unchanged) */}
-        <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <div className="accent-line-blue mb-8" />
-              <h3 className="font-serif text-2xl text-white mb-8">
-                {t('contact.direct.title')}
-              </h3>
-
-              <div className="space-y-6 mb-12">
-                <a
-                  href="mailto:contact@sunlightholdings.sn"
-                  className="flex items-start gap-4 group"
-                >
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#2962ff]/10 rounded-full shrink-0 group-hover:bg-[#2962ff]/20 transition-colors">
-                    <Mail className="text-[#2962ff]" size={18} />
-                  </div>
-                  <div>
-                    <p className="font-display text-xs tracking-wider uppercase text-white/50 mb-1">
-                      {t('contact.direct.email')}
-                    </p>
-                    <p className="text-white group-hover:text-[#2962ff] transition-colors">
-                      contact@sunlightholdings.sn
-                    </p>
-                  </div>
-                </a>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#d4af37]/10 rounded-full shrink-0">
-                    <MapPin className="text-[#d4af37]" size={18} />
-                  </div>
-                  <div>
-                    <p className="font-display text-xs tracking-wider uppercase text-white/50 mb-1">
-                      {t('contact.direct.location')}
-                    </p>
-                    <p className="text-white">
-                      Dakar, Sénégal
-                    </p>
-                  </div>
-                </div>
-
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-4 group"
-                >
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#2962ff]/10 rounded-full shrink-0 group-hover:bg-[#2962ff]/20 transition-colors">
-                    <Linkedin className="text-[#2962ff]" size={18} />
-                  </div>
-                  <div>
-                    <p className="font-display text-xs tracking-wider uppercase text-white/50 mb-1">
-                      LinkedIn
-                    </p>
-                    <p className="text-white group-hover:text-[#2962ff] transition-colors">
-                      Sunlight Holdings
-                    </p>
-                  </div>
-                </a>
-              </div>
-
-              {/* Note */}
-              <div className="p-6 bg-[#0d1220] border-l-2 border-[#d4af37]">
-                <p className="text-white/50 text-sm leading-relaxed">
-                  {t('contact.note')}
-                </p>
-              </div>
-            </motion.div>
-
           </div>
         </div>
       </section>
     </Layout>
   );
 }
-
