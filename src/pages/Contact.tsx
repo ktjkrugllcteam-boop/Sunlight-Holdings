@@ -226,7 +226,7 @@
 //                       {t('contact.direct.email')}
 //                     </p>
 //                     <p className="text-white group-hover:text-[#2962ff] transition-colors">
-//                       contact@sunlightholdings.sn
+//                       
 //                     </p>
 //                   </div>
 //                 </a>
