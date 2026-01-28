@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+
+
 interface APIImage {
   imageID: number;
   url: string;
@@ -43,7 +45,7 @@ export default function VirtualTour({
   isOpen, 
   onClose, 
   startRoomId = 1, 
-  rooms = [] // Default to empty array to prevent crashes if undefined
+  rooms 
 }: VirtualTourProps) {
   const { language } = useLanguage();
   const [currentRoomId, setCurrentRoomId] = useState<number>(startRoomId);
@@ -52,45 +54,36 @@ export default function VirtualTour({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showThumbnails, setShowThumbnails] = useState(false);
 
-  // Safe fallback if rooms is empty
-  const currentRoom = useMemo(() => {
-    if (!rooms || rooms.length === 0) return undefined;
-    return rooms.find(r => r.roomId === currentRoomId) || rooms[0];
-  }, [rooms, currentRoomId]);
+  
+  const currentRoom = rooms.find(r => r.roomId === currentRoomId) || rooms[0];
 
+ 
   const connectedRooms = useMemo(() => {
-    if (!currentRoom || !rooms) return [];
+    if (!currentRoom) return [];
     
-    const connectedIds = (currentRoom.connections || []).map(conn => {
+   
+    const connectedIds = currentRoom.connections.map(conn => {
+     
       return conn.from === currentRoom.roomId ? conn.to : conn.from;
     });
 
+    
     return rooms.filter(r => connectedIds.includes(r.roomId));
   }, [currentRoom, rooms]);
 
   const mapBounds = useMemo(() => {
-    if (!rooms || !rooms.length) return { w: 100, h: 100 };
-    const maxX = Math.max(...rooms.map(r => r.mapX || 0)) + 50; 
-    const maxY = Math.max(...rooms.map(r => r.mapY || 0)) + 50;
+    if (!rooms.length) return { w: 100, h: 100 };
+    const maxX = Math.max(...rooms.map(r => r.mapX)) + 50; 
+    const maxY = Math.max(...rooms.map(r => r.mapY)) + 50;
     return { w: maxX, h: maxY };
   }, [rooms]);
 
+ 
   useEffect(() => {
     setCurrentImageIndex(0);
   }, [currentRoomId]);
 
-  
-  const nextImage = useCallback(() => {
-    if (!currentRoom?.images) return;
-    setCurrentImageIndex(prev => 
-      prev < currentRoom.images.length - 1 ? prev + 1 : prev
-    );
-  }, [currentRoom?.images?.length]); 
-
-  const prevImage = useCallback(() => {
-    setCurrentImageIndex(prev => prev > 0 ? prev - 1 : prev);
-  }, []);
-
+ 
   useEffect(() => {
     if (!isOpen) return;
 
@@ -103,7 +96,17 @@ export default function VirtualTour({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, nextImage, prevImage]); 
+  }, [isOpen, onClose]);
+
+  const nextImage = useCallback(() => {
+    setCurrentImageIndex(prev => 
+      prev < currentRoom.images.length - 1 ? prev + 1 : prev
+    );
+  }, [currentRoom.images.length]);
+
+  const prevImage = useCallback(() => {
+    setCurrentImageIndex(prev => prev > 0 ? prev - 1 : prev);
+  }, []);
 
   const navigateToRoom = useCallback((roomId: number) => {
     setIsTransitioning(true);
@@ -113,11 +116,7 @@ export default function VirtualTour({
     }, 500);
   }, []);
 
-
   if (!isOpen || !currentRoom) return null;
-
- 
-  const currentImageUrl = currentRoom.images?.[currentImageIndex]?.url || '';
 
   return (
     <AnimatePresence>
@@ -141,17 +140,11 @@ export default function VirtualTour({
               exit={{ opacity: 0, scale: 0.95 }}
               className="absolute inset-0"
             >
-              {currentImageUrl ? (
-                <img
-                  src={currentImageUrl}
-                  alt={currentRoom.roomName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/40">
-                  No Image Available
-                </div>
-              )}
+              <img
+                src={currentRoom.images[currentImageIndex]?.url}
+                alt={currentRoom.roomName}
+                className="w-full h-full object-cover"
+              />
               {/* Gradient overlays */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a]/80 via-transparent to-[#0a0f1a]/40" />
             </motion.div>
@@ -207,7 +200,7 @@ export default function VirtualTour({
           </div>
 
         
-          {currentRoom.images && currentRoom.images.length > 1 && (
+          {currentRoom.images.length > 1 && (
             <>
               <motion.button
                 onClick={prevImage}
@@ -223,11 +216,11 @@ export default function VirtualTour({
               <motion.button
                 onClick={nextImage}
                 className={`absolute right-6 top-1/2 -translate-y-1/2 p-4 bg-[#0a0f1a]/60 backdrop-blur-sm border border-white/10 text-white transition-all z-20 ${
-                  currentImageIndex === (currentRoom.images?.length || 0) - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-[#0a0f1a]/80'
+                  currentImageIndex === currentRoom.images.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-[#0a0f1a]/80'
                 }`}
-                whileHover={currentImageIndex < (currentRoom.images?.length || 0) - 1 ? { scale: 1.1 } : {}}
-                whileTap={currentImageIndex < (currentRoom.images?.length || 0) - 1 ? { scale: 0.95 } : {}}
-                disabled={currentImageIndex === (currentRoom.images?.length || 0) - 1}
+                whileHover={currentImageIndex < currentRoom.images.length - 1 ? { scale: 1.1 } : {}}
+                whileTap={currentImageIndex < currentRoom.images.length - 1 ? { scale: 0.95 } : {}}
+                disabled={currentImageIndex === currentRoom.images.length - 1}
               >
                 <ChevronRight size={24} />
               </motion.button>
@@ -235,7 +228,7 @@ export default function VirtualTour({
           )}
 
           {/* Image Counter */}
-          {currentRoom.images && currentRoom.images.length > 1 && (
+          {currentRoom.images.length > 1 && (
             <div className="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-[#0a0f1a]/60 backdrop-blur-sm border border-white/10 text-white/80 text-sm font-display tracking-wider z-20">
               {currentImageIndex + 1} / {currentRoom.images.length}
             </div>
@@ -247,6 +240,7 @@ export default function VirtualTour({
               <motion.button
                 key={room.roomId}
                 onClick={() => navigateToRoom(room.roomId)}
+                // Added min-w-[140px] and justify-center to fix your button size issue
                 className="min-w-[140px] justify-center group flex items-center gap-3 px-6 py-3 bg-[#0a0f1a]/70 backdrop-blur-sm border border-[#2962ff]/30 hover:border-[#2962ff] transition-all"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
@@ -264,7 +258,7 @@ export default function VirtualTour({
           <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
             {/* Room Thumbnails */}
             <AnimatePresence>
-              {showThumbnails && currentRoom.images && (
+              {showThumbnails && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -336,6 +330,7 @@ export default function VirtualTour({
                           : 'bg-[#d4af37]/60 hover:bg-[#d4af37]'
                       }`}
                       style={{
+                        // Convert mapX/Y pixels to percentages based on max bounds
                         left: `${(room.mapX / mapBounds.w) * 100}%`,
                         top: `${(room.mapY / mapBounds.h) * 100}%`,
                         transform: 'translate(-50%, -50%)'
@@ -348,7 +343,9 @@ export default function VirtualTour({
                   {/* Connection lines */}
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     {rooms.map((room) =>
-                      (room.connections || []).map((conn) => {
+                      room.connections.map((conn) => {
+                        // Avoid drawing lines twice by only drawing if 'from' is current room
+                        // or if the connected room ID is greater than current (simple dedup strategy)
                         if (conn.from !== room.roomId) return null;
 
                         const targetRoom = rooms.find(r => r.roomId === conn.to);
@@ -357,6 +354,7 @@ export default function VirtualTour({
                         return (
                           <line
                             key={`${room.roomId}-${targetRoom.roomId}`}
+                            // Convert pixels to percentages for SVG lines
                             x1={`${(room.mapX / mapBounds.w) * 100}%`}
                             y1={`${(room.mapY / mapBounds.h) * 100}%`}
                             x2={`${(targetRoom.mapX / mapBounds.w) * 100}%`}
@@ -369,6 +367,7 @@ export default function VirtualTour({
                     )}
                   </svg>
                 </div>
+
                 {/* Legend */}
                 <div className="mt-4 flex items-center gap-4 text-xs text-white/50">
                   <div className="flex items-center gap-2">

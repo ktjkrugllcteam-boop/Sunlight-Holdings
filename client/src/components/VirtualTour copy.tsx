@@ -1,96 +1,183 @@
 /*
- * Virtual Tour Component - Dynamic Version
- * Supports new JSON structure with auto-scaling map
+ * Virtual Tour Component - Immersive Room-by-Room Experience
+ * 
+ * Features:
+ * - Full-screen immersive photo viewer
+ * - Room-by-room navigation with smooth transitions
+ * - Interactive hotspots to move between spaces
+ * - Mini-map/floor plan navigation
+ * - Ken Burns effect for cinematic feel
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, ChevronLeft, ChevronRight, Home, 
+  X, ChevronLeft, ChevronRight, Home, Maximize2, 
   Grid3X3, MapPin, Eye, ArrowRight
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-interface APIImage {
-  imageID: number;
-  url: string;
+interface Room {
+  id: string;
+  name: { fr: string; en: string };
+  images: string[];
+  description: { fr: string; en: string };
+  connections: string[]; // IDs of connected rooms
+  position: { x: number; y: number }; // Position on floor plan
 }
 
-interface APIConnection {
-  connectionID: number;
-  from: number;
-  to: number;
-}
-
-interface APIRoom {
-  roomId: number;
-  roomName: string;
-  description: string;
-  mapX: number;
-  mapY: number;
-  images: APIImage[];
-  connections: APIConnection[];
-}
+const rooms: Room[] = [
+  {
+    id: 'entrance',
+    name: { fr: 'Entrée', en: 'Entrance' },
+    images: ['/images/hallway-art.jpg', '/images/hallway-blue.jpg'],
+    description: {
+      fr: 'Hall d\'entrée avec éclairage ambiant bleu et art africain',
+      en: 'Entrance hall with blue ambient lighting and African art'
+    },
+    connections: ['living', 'bedroom1'],
+    position: { x: 50, y: 15 }
+  },
+  {
+    id: 'living',
+    name: { fr: 'Salon', en: 'Living Room' },
+    images: [
+      '/images/living-tv-sofa.jpg',
+      '/images/living-room-blue-dark.jpg',
+      '/images/tv-wall-bright.jpg',
+      '/images/living-room-alternate.jpg',
+      '/images/living-room-plant.jpg'
+    ],
+    description: {
+      fr: 'Espace de vie avec mur média personnalisé et éclairage ambiant',
+      en: 'Living space with custom media wall and ambient lighting'
+    },
+    connections: ['entrance', 'dining', 'kitchen'],
+    position: { x: 30, y: 40 }
+  },
+  {
+    id: 'dining',
+    name: { fr: 'Salle à Manger', en: 'Dining Room' },
+    images: ['/images/dining-niches.jpg', '/images/circular-art-niches.jpg'],
+    description: {
+      fr: 'Salle à manger avec niches illuminées et art contemporain',
+      en: 'Dining area with illuminated niches and contemporary art'
+    },
+    connections: ['living', 'kitchen'],
+    position: { x: 50, y: 50 }
+  },
+  {
+    id: 'kitchen',
+    name: { fr: 'Cuisine', en: 'Kitchen' },
+    images: ['/images/kitchen-niches-wide.jpg', '/images/kitchen.jpg'],
+    description: {
+      fr: 'Cuisine ouverte avec îlot en marbre et niches LED bleues',
+      en: 'Open kitchen with marble island and blue LED niches'
+    },
+    connections: ['living', 'dining'],
+    position: { x: 70, y: 40 }
+  },
+  {
+    id: 'bedroom1',
+    name: { fr: 'Chambre Principale', en: 'Master Bedroom' },
+    images: [
+      '/images/bedroom-niches-1.jpg',
+      '/images/bedroom-niches-2.jpg',
+      '/images/bedroom-niches-3.jpg',
+      '/images/bedroom-full-view.jpg'
+    ],
+    description: {
+      fr: 'Chambre principale avec niches d\'exposition illuminées',
+      en: 'Master bedroom with illuminated display niches'
+    },
+    connections: ['entrance', 'bedroom2', 'bathroom1', 'closet'],
+    position: { x: 25, y: 75 }
+  },
+  {
+    id: 'bedroom2',
+    name: { fr: 'Suite', en: 'Suite' },
+    images: [
+      '/images/bedroom-blue-wave.jpg',
+      '/images/bedroom-arch-view.jpg',
+      '/images/bedroom-closet.jpg',
+      '/images/bedroom-detail.jpg'
+    ],
+    description: {
+      fr: 'Suite avec tête de lit sculpturale et éclairage LED',
+      en: 'Suite with sculptural headboard and LED lighting'
+    },
+    connections: ['bedroom1', 'bathroom2'],
+    position: { x: 50, y: 85 }
+  },
+  {
+    id: 'bathroom1',
+    name: { fr: 'Salle de Bain Principale', en: 'Master Bathroom' },
+    images: [
+      '/images/bathroom-1.jpg',
+      '/images/bathroom-2.jpg',
+      '/images/bathroom-3.jpg'
+    ],
+    description: {
+      fr: 'Salle de bain en marbre avec douche à l\'italienne',
+      en: 'Marble bathroom with walk-in rain shower'
+    },
+    connections: ['bedroom1'],
+    position: { x: 15, y: 85 }
+  },
+  {
+    id: 'bathroom2',
+    name: { fr: 'Salle de Bain Suite', en: 'Suite Bathroom' },
+    images: [
+      '/images/bathroom-4.jpg',
+      '/images/bathroom-5.jpg',
+      '/images/bathroom-6.jpg',
+      '/images/bathroom-7.jpg',
+      '/images/bathroom-8.jpg',
+      '/images/bathroom-9.jpg'
+    ],
+    description: {
+      fr: 'Salle de bain moderne avec finitions premium',
+      en: 'Modern bathroom with premium finishes'
+    },
+    connections: ['bedroom2'],
+    position: { x: 75, y: 85 }
+  },
+  {
+    id: 'closet',
+    name: { fr: 'Dressing', en: 'Walk-in Closet' },
+    images: ['/images/closet-glass.jpg'],
+    description: {
+      fr: 'Dressing avec portes vitrées et éclairage intégré',
+      en: 'Walk-in closet with glass doors and integrated lighting'
+    },
+    connections: ['bedroom1'],
+    position: { x: 35, y: 65 }
+  }
+];
 
 interface VirtualTourProps {
   isOpen: boolean;
   onClose: () => void;
-  startRoomId?: number;
-  rooms: APIRoom[];
+  startRoom?: string;
 }
 
-export default function VirtualTour({ 
-  isOpen, 
-  onClose, 
-  startRoomId = 1, 
-  rooms = [] // Default to empty array to prevent crashes if undefined
-}: VirtualTourProps) {
+export default function VirtualTour({ isOpen, onClose, startRoom = 'entrance' }: VirtualTourProps) {
   const { language } = useLanguage();
-  const [currentRoomId, setCurrentRoomId] = useState<number>(startRoomId);
+  const [currentRoomId, setCurrentRoomId] = useState(startRoom);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFloorPlan, setShowFloorPlan] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showThumbnails, setShowThumbnails] = useState(false);
 
-  // Safe fallback if rooms is empty
-  const currentRoom = useMemo(() => {
-    if (!rooms || rooms.length === 0) return undefined;
-    return rooms.find(r => r.roomId === currentRoomId) || rooms[0];
-  }, [rooms, currentRoomId]);
+  const currentRoom = rooms.find(r => r.id === currentRoomId) || rooms[0];
+  const connectedRooms = rooms.filter(r => currentRoom.connections.includes(r.id));
 
-  const connectedRooms = useMemo(() => {
-    if (!currentRoom || !rooms) return [];
-    
-    const connectedIds = (currentRoom.connections || []).map(conn => {
-      return conn.from === currentRoom.roomId ? conn.to : conn.from;
-    });
-
-    return rooms.filter(r => connectedIds.includes(r.roomId));
-  }, [currentRoom, rooms]);
-
-  const mapBounds = useMemo(() => {
-    if (!rooms || !rooms.length) return { w: 100, h: 100 };
-    const maxX = Math.max(...rooms.map(r => r.mapX || 0)) + 50; 
-    const maxY = Math.max(...rooms.map(r => r.mapY || 0)) + 50;
-    return { w: maxX, h: maxY };
-  }, [rooms]);
-
+  // Reset image index when room changes
   useEffect(() => {
     setCurrentImageIndex(0);
   }, [currentRoomId]);
 
-  
-  const nextImage = useCallback(() => {
-    if (!currentRoom?.images) return;
-    setCurrentImageIndex(prev => 
-      prev < currentRoom.images.length - 1 ? prev + 1 : prev
-    );
-  }, [currentRoom?.images?.length]); 
-
-  const prevImage = useCallback(() => {
-    setCurrentImageIndex(prev => prev > 0 ? prev - 1 : prev);
-  }, []);
-
+  // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
 
@@ -103,9 +190,19 @@ export default function VirtualTour({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, nextImage, prevImage]); 
+  }, [isOpen, onClose]);
 
-  const navigateToRoom = useCallback((roomId: number) => {
+  const nextImage = useCallback(() => {
+    setCurrentImageIndex(prev => 
+      prev < currentRoom.images.length - 1 ? prev + 1 : prev
+    );
+  }, [currentRoom.images.length]);
+
+  const prevImage = useCallback(() => {
+    setCurrentImageIndex(prev => prev > 0 ? prev - 1 : prev);
+  }, []);
+
+  const navigateToRoom = useCallback((roomId: string) => {
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentRoomId(roomId);
@@ -113,11 +210,7 @@ export default function VirtualTour({
     }, 500);
   }, []);
 
-
-  if (!isOpen || !currentRoom) return null;
-
- 
-  const currentImageUrl = currentRoom.images?.[currentImageIndex]?.url || '';
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -141,17 +234,11 @@ export default function VirtualTour({
               exit={{ opacity: 0, scale: 0.95 }}
               className="absolute inset-0"
             >
-              {currentImageUrl ? (
-                <img
-                  src={currentImageUrl}
-                  alt={currentRoom.roomName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/40">
-                  No Image Available
-                </div>
-              )}
+              <img
+                src={currentRoom.images[currentImageIndex]}
+                alt={currentRoom.name[language]}
+                className="w-full h-full object-cover"
+              />
               {/* Gradient overlays */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a]/80 via-transparent to-[#0a0f1a]/40" />
             </motion.div>
@@ -170,10 +257,10 @@ export default function VirtualTour({
               </motion.button>
               <div>
                 <h2 className="font-serif text-2xl text-white">
-                  {currentRoom.roomName}
+                  {currentRoom.name[language]}
                 </h2>
                 <p className="text-white/60 text-sm">
-                  {currentRoom.description}
+                  {currentRoom.description[language]}
                 </p>
               </div>
             </div>
@@ -206,8 +293,8 @@ export default function VirtualTour({
             </div>
           </div>
 
-        
-          {currentRoom.images && currentRoom.images.length > 1 && (
+          {/* Image Navigation Arrows */}
+          {currentRoom.images.length > 1 && (
             <>
               <motion.button
                 onClick={prevImage}
@@ -223,11 +310,11 @@ export default function VirtualTour({
               <motion.button
                 onClick={nextImage}
                 className={`absolute right-6 top-1/2 -translate-y-1/2 p-4 bg-[#0a0f1a]/60 backdrop-blur-sm border border-white/10 text-white transition-all z-20 ${
-                  currentImageIndex === (currentRoom.images?.length || 0) - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-[#0a0f1a]/80'
+                  currentImageIndex === currentRoom.images.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-[#0a0f1a]/80'
                 }`}
-                whileHover={currentImageIndex < (currentRoom.images?.length || 0) - 1 ? { scale: 1.1 } : {}}
-                whileTap={currentImageIndex < (currentRoom.images?.length || 0) - 1 ? { scale: 0.95 } : {}}
-                disabled={currentImageIndex === (currentRoom.images?.length || 0) - 1}
+                whileHover={currentImageIndex < currentRoom.images.length - 1 ? { scale: 1.1 } : {}}
+                whileTap={currentImageIndex < currentRoom.images.length - 1 ? { scale: 0.95 } : {}}
+                disabled={currentImageIndex === currentRoom.images.length - 1}
               >
                 <ChevronRight size={24} />
               </motion.button>
@@ -235,25 +322,25 @@ export default function VirtualTour({
           )}
 
           {/* Image Counter */}
-          {currentRoom.images && currentRoom.images.length > 1 && (
+          {currentRoom.images.length > 1 && (
             <div className="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-[#0a0f1a]/60 backdrop-blur-sm border border-white/10 text-white/80 text-sm font-display tracking-wider z-20">
               {currentImageIndex + 1} / {currentRoom.images.length}
             </div>
           )}
 
-          {/* Room Navigation Hotspots (Middle Buttons) */}
+          {/* Room Navigation Hotspots */}
           <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-4 z-20">
             {connectedRooms.map((room) => (
               <motion.button
-                key={room.roomId}
-                onClick={() => navigateToRoom(room.roomId)}
-                className="min-w-[140px] justify-center group flex items-center gap-3 px-6 py-3 bg-[#0a0f1a]/70 backdrop-blur-sm border border-[#2962ff]/30 hover:border-[#2962ff] transition-all"
+                key={room.id}
+                onClick={() => navigateToRoom(room.id)}
+                className="group flex items-center gap-3 px-6 py-3 bg-[#0a0f1a]/70 backdrop-blur-sm border border-[#2962ff]/30 hover:border-[#2962ff] transition-all"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Eye size={18} className="text-[#2962ff]" />
                 <span className="text-white font-display text-sm tracking-wider uppercase">
-                  {room.roomName}
+                  {room.name[language]}
                 </span>
                 <ArrowRight size={16} className="text-white/50 group-hover:text-[#d4af37] group-hover:translate-x-1 transition-all" />
               </motion.button>
@@ -264,7 +351,7 @@ export default function VirtualTour({
           <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
             {/* Room Thumbnails */}
             <AnimatePresence>
-              {showThumbnails && currentRoom.images && (
+              {showThumbnails && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -273,7 +360,7 @@ export default function VirtualTour({
                 >
                   {currentRoom.images.map((img, idx) => (
                     <motion.button
-                      key={img.imageID}
+                      key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
                       className={`relative w-20 h-14 overflow-hidden border-2 transition-all ${
                         idx === currentImageIndex 
@@ -282,7 +369,7 @@ export default function VirtualTour({
                       }`}
                       whileHover={{ scale: 1.05 }}
                     >
-                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt="" className="w-full h-full object-cover" />
                     </motion.button>
                   ))}
                 </motion.div>
@@ -290,20 +377,20 @@ export default function VirtualTour({
             </AnimatePresence>
 
             {/* Room Navigation Pills */}
-            <div className="flex justify-center gap-2 flex-wrap">
+            <div className="flex justify-center gap-2">
               {rooms.map((room) => (
                 <motion.button
-                  key={room.roomId}
-                  onClick={() => navigateToRoom(room.roomId)}
+                  key={room.id}
+                  onClick={() => navigateToRoom(room.id)}
                   className={`px-4 py-2 text-xs font-display tracking-wider uppercase transition-all ${
-                    room.roomId === currentRoomId
+                    room.id === currentRoomId
                       ? 'bg-[#2962ff] text-white'
                       : 'bg-[#0a0f1a]/60 backdrop-blur-sm border border-white/10 text-white/60 hover:text-white hover:border-white/30'
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {room.roomName}
+                  {room.name[language]}
                 </motion.button>
               ))}
             </div>
@@ -328,39 +415,36 @@ export default function VirtualTour({
                   {/* Room markers */}
                   {rooms.map((room) => (
                     <motion.button
-                      key={room.roomId}
-                      onClick={() => navigateToRoom(room.roomId)}
-                      className={`absolute w-4 h-4 rounded-full transition-all z-10 ${
-                        room.roomId === currentRoomId
+                      key={room.id}
+                      onClick={() => navigateToRoom(room.id)}
+                      className={`absolute w-4 h-4 rounded-full transition-all ${
+                        room.id === currentRoomId
                           ? 'bg-[#2962ff] ring-4 ring-[#2962ff]/30'
                           : 'bg-[#d4af37]/60 hover:bg-[#d4af37]'
                       }`}
                       style={{
-                        left: `${(room.mapX / mapBounds.w) * 100}%`,
-                        top: `${(room.mapY / mapBounds.h) * 100}%`,
+                        left: `${room.position.x}%`,
+                        top: `${room.position.y}%`,
                         transform: 'translate(-50%, -50%)'
                       }}
                       whileHover={{ scale: 1.3 }}
-                      title={room.roomName}
+                      title={room.name[language]}
                     />
                   ))}
                   
                   {/* Connection lines */}
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     {rooms.map((room) =>
-                      (room.connections || []).map((conn) => {
-                        if (conn.from !== room.roomId) return null;
-
-                        const targetRoom = rooms.find(r => r.roomId === conn.to);
-                        if (!targetRoom) return null;
-
+                      room.connections.map((connId) => {
+                        const connRoom = rooms.find(r => r.id === connId);
+                        if (!connRoom || room.id > connId) return null;
                         return (
                           <line
-                            key={`${room.roomId}-${targetRoom.roomId}`}
-                            x1={`${(room.mapX / mapBounds.w) * 100}%`}
-                            y1={`${(room.mapY / mapBounds.h) * 100}%`}
-                            x2={`${(targetRoom.mapX / mapBounds.w) * 100}%`}
-                            y2={`${(targetRoom.mapY / mapBounds.h) * 100}%`}
+                            key={`${room.id}-${connId}`}
+                            x1={`${room.position.x}%`}
+                            y1={`${room.position.y}%`}
+                            x2={`${connRoom.position.x}%`}
+                            y2={`${connRoom.position.y}%`}
                             stroke="rgba(41, 98, 255, 0.3)"
                             strokeWidth="1"
                           />
@@ -369,6 +453,7 @@ export default function VirtualTour({
                     )}
                   </svg>
                 </div>
+
                 {/* Legend */}
                 <div className="mt-4 flex items-center gap-4 text-xs text-white/50">
                   <div className="flex items-center gap-2">

@@ -11,6 +11,7 @@ import Portfolio from "./pages/Portfolio";
 import PlatinumEdge from "./pages/PlatinumEdge";
 import Investment from "./pages/Investment";
 import Contact from "./pages/Contact";
+import Services from "./pages/Services";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/portfolio/platinum-edge" component={PlatinumEdge} />
       <Route path="/investment" component={Investment} />
       <Route path="/contact" component={Contact} />
+      <Route path="/services" component={Services} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -16,7 +16,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.portfolio': 'Portfolio',
     'nav.investment': 'Approche d\'Investissement',
     'nav.contact': 'Contact',
-    
+    'nav.services': 'Services',
     // Hero
     'hero.headline': 'Redéfinir l\'Immobilier de Luxe en Afrique de l\'Ouest',
     'hero.subheadline': 'Acquisitions stratégiques. Excellence du design. Création de valeur à long terme.',
@@ -150,6 +150,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.portfolio': 'Portfolio',
     'nav.investment': 'Investment Approach',
     'nav.contact': 'Contact',
+    'nav.services': 'Services',
     
     // Hero
     'hero.headline': 'Redefining Luxury Real Estate in West Africa',

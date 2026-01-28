@@ -31,6 +31,7 @@ export default function Header() {
     { href: '/portfolio', label: t('nav.portfolio') },
     { href: '/investment', label: t('nav.investment') },
     { href: '/contact', label: t('nav.contact') },
+    { href: '/services', label: t('nav.services') },
   ];
 
   const isActive = (href: string) => {
