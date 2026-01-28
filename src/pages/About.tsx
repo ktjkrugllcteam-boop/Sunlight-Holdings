@@ -141,15 +141,7 @@ export default function About() {
                   </div>
                 </div>
 
-                {/* <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#2962ff]/10 rounded-full shrink-0">
-                    <Building2 className="text-[#2962ff]" size={20} />
-                  </div>
-                  <div>
-                    <p className="text-white font-medium">Al Habtoor Group, Dubai</p>
-                    <p className="text-white/50 text-sm">Portfolio Manager - $500M Real Estate Portfolio</p>
-                  </div>
-                </div> */}
+             
 
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 flex items-center justify-center bg-[#d4af37]/10 rounded-full shrink-0">

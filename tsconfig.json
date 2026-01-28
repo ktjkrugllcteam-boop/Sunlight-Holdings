@@ -1,19 +1,26 @@
-
-
 {
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-
     "jsx": "react-jsx",
-
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    
+    // CHANGE 1: Enable mixed JS/TS files
+    "allowJs": true, 
+    "checkJs": false,
+
+    // CHANGE 2: Fix Vercel API imports
+    // This allows you to import files from outside 'api' folder cleanly if needed
+    "esModuleInterop": true
   },
-  "include": ["src"]
+  
+  // CHANGE 3: Include the 'api' folder
+  // Vercel functions usually live in a root 'api' folder, not 'src'
+  "include": ["src", "api"]
 }
