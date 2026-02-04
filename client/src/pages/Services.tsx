@@ -12,7 +12,7 @@ export default function Services() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('http://localhost:3000/api/property/getpages');
+        const res = await fetch('/api/property/getpages');
         const data = await res.json();
   
         const page = data.find(p => p.slug === 'our-services');

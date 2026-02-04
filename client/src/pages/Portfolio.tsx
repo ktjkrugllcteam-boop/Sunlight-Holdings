@@ -49,7 +49,7 @@ export default function Portfolio() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/property/propertiesGet");
+        const res = await fetch("/api/property/propertiesGet");
 
         if (!res.ok) {
           throw new Error(`Error fetching properties: ${res.statusText}`);
