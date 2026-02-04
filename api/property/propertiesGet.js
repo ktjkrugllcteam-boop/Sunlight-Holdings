@@ -1,13 +1,14 @@
 import mysql from "mysql2/promise";
+import  withMiddleware  from "../Util/middleware.js";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   console.log("Received request for properties list");
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
   }
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  //   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  // res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  // res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   let connection;
 
@@ -39,3 +40,4 @@ export default async function handler(req, res) {
     if (connection) await connection.end();
   }
 }
+export default withMiddleware(handler);

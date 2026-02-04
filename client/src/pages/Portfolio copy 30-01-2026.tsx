@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Layout from "@/components/Layout";
@@ -11,57 +5,53 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
 
-
+// Helper type for multi-language fields
 type LocalizedContent = {
   [key: string]: string;
 };
 
 type Property = {
   id: number;
-  title: LocalizedContent | string;
+  title: LocalizedContent | string; // Can be an object {en:..., fr:...} or fallback string
   location: LocalizedContent | string;
   description: LocalizedContent | string;
-  thumbImage: string; 
-};
-
-
-const parseJSON = (input: string) => {
-  try {
-    return JSON.parse(input);
-  } catch (e) {
-    return input;
-  }
-};
-
-const getLocalized = (content: LocalizedContent | string, language: string) => {
-  if (typeof content === "object" && content !== null) {
-
-    return (content as any)[language] || (content as any)["en"] || "";
-  }
-  return content;
+  thumbImage: string; // Note: Ensure this matches your DB column name (usually camelCase)
 };
 
 export default function Portfolio() {
-  const { language, t } = useLanguage();
+  // 1️⃣ Get current language code (e.g., 'en', 'fr') alongside 't'
+  const { language, t } = useLanguage(); 
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // 2️⃣ Helper to safely get text based on current language
+  const getLocalized = (content: LocalizedContent | string) => {
+    if (typeof content === "object" && content !== null) {
+      // Return requested language, or fallback to 'en', or empty string
+      // @ts-ignore
+      return content[language] || content["en"] || "";
+    }
+    return content; // If it's just a string, return it as is
+  };
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
         const res = await fetch("http://localhost:3000/api/property/propertiesGet");
-
+        
         if (!res.ok) {
           throw new Error(`Error fetching properties: ${res.statusText}`);
         }
-
-        const rawData = await res.json();
         
-      
+        const rawData = await res.json();
+        console.log("Fetch Properties Response:", rawData);
+
+        // 3️⃣ Parse the JSON strings from DB into objects
         const formattedData = rawData.map((item: any) => ({
-          id: item.id,
+          id: item.id, // Ensure your DB returns 'id' or 'Pid'
           thumbImage: item.thumbImage, 
-          title: parseJSON(item.projectName),
+          // Parse the JSON strings:
+          title: parseJSON(item.projectName), 
           location: parseJSON(item.location),
           description: parseJSON(item.description),
         }));
@@ -77,9 +67,18 @@ export default function Portfolio() {
     fetchProperties();
   }, []);
 
+
+  const parseJSON = (input: string) => {
+    try {
+      return JSON.parse(input);
+    } catch (e) {
+      return input; 
+    }
+  };
+
   return (
     <Layout>
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-24">
         <div className="container">
           <motion.div
@@ -99,7 +98,7 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Properties List */}
+      {/* Properties */}
       <section className="pb-24 lg:pb-32">
         <div className="container">
           {loading ? (
@@ -114,16 +113,16 @@ export default function Portfolio() {
                 transition={{
                   duration: 0.8,
                   ease: "easeOut",
-                  delay: index * 0.1,
+                  delay: index * 0.1
                 }}
               >
-               
-                <Link href={`/portfolio/property?id=${property.id}`}>
+                <Link href={`/portfolio/platinum-edge?id=${property.id}`}>
                   <div className="group relative overflow-hidden cursor-pointer mb-10">
                     <div className="aspect-[21/9] overflow-hidden">
                       <img
                         src={property.thumbImage}
-                        alt={getLocalized(property.title, language) as string}
+                        // 4️⃣ Use getLocalized for alt text
+                        alt={getLocalized(property.title)}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/20 to-transparent" />
@@ -135,14 +134,17 @@ export default function Portfolio() {
                           <div className="flex items-center gap-2 text-[#2962ff] mb-3">
                             <MapPin size={16} />
                             <span className="font-display text-xs tracking-widest uppercase">
-                              {getLocalized(property.location, language)}
+                              {/* 5️⃣ Render Localized Location */}
+                              {getLocalized(property.location)}
                             </span>
                           </div>
                           <h2 className="font-serif text-3xl lg:text-4xl text-white mb-3">
-                            {getLocalized(property.title, language)}
+                            {/* 6️⃣ Render Localized Title */}
+                            {getLocalized(property.title)}
                           </h2>
                           <p className="text-white/60 max-w-xl">
-                            {getLocalized(property.description, language)}
+                            {/* 7️⃣ Render Localized Description */}
+                            {getLocalized(property.description)}
                           </p>
                         </div>
 

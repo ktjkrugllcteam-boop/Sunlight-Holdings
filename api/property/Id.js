@@ -1,17 +1,19 @@
 import mysql from "mysql2/promise";
-
-export default async function handler(req, res) {
+import verifyAdmin from "../helper/verifyAdmin.js";
+import  withMiddleware  from "../Util/middleware.js";
+ async function handler(req, res) {
   console.log("Property API called with method:", req.method);
   const { Id } = req.query;
 
-  // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+ 
+  // res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  // res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
+  // res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (!Id) {
     return res.status(400).json({ message: "Property ID is required" });
   }
+  
 
   let connection;
 
@@ -21,9 +23,9 @@ export default async function handler(req, res) {
       ssl: { rejectUnauthorized: false },
     });
 
-    // ================= GET =================
+   
     if (req.method === "GET") {
-      // Fetch property info + rooms + images + room connections
+
       const [rows] = await connection.query(
         `
         SELECT 
@@ -61,7 +63,7 @@ export default async function handler(req, res) {
         return res.status(404).json({ message: "Property not found" });
       }
 
-      // Build nested structure
+    
       const property = {
         Id: rows[0].Pid,
         projectName: rows[0].projectName,
@@ -73,9 +75,9 @@ export default async function handler(req, res) {
       };
 
       rows.forEach(row => {
-        if (!row.RoomId) return; // skip if property has no rooms
+        if (!row.RoomId) return; 
 
-        // Rooms
+      
         if (!property.rooms[row.RoomId]) {
           property.rooms[row.RoomId] = {
             roomId: row.RoomId,
@@ -88,7 +90,7 @@ export default async function handler(req, res) {
           };
         }
 
-        // Images
+        
         if (row.ImageID && !property.rooms[row.RoomId].images.find(img => img.imageID === row.ImageID)) {
           property.rooms[row.RoomId].images.push({
             imageID: row.ImageID,
@@ -96,7 +98,7 @@ export default async function handler(req, res) {
           });
         }
 
-        // Connections
+      
         if (row.ConnectionID) {
           const exists = property.rooms[row.RoomId].connections.find(c => c.connectionID === row.ConnectionID);
           if (!exists) {
@@ -240,6 +242,12 @@ export default async function handler(req, res) {
 
 
     if (req.method === "PUT") {
+        try {
+      verifyAdmin(req);
+    } catch (error) {
+      return res.status(403).json({ message: error.message });
+    }
+  
       const {
         projectName,
         location,
@@ -248,7 +256,7 @@ export default async function handler(req, res) {
         price
       } = req.body;
 
-      // 1. Build query dynamically based on what was sent
+      
       const fields = [];
       const values = [];
 
@@ -273,13 +281,13 @@ export default async function handler(req, res) {
         values.push(price);
       }
 
-      // 2. If no fields were sent, stop here
+     
       if (fields.length === 0) {
         return res.status(400).json({ message: "No fields provided for update" });
       }
 
 
-      // 3. Add the ID to the end of the values array
+     
       values.push(Id);
 
       try {
@@ -371,3 +379,4 @@ export default async function handler(req, res) {
     if (connection) await connection.end();
   }
 }
+export default withMiddleware(handler);

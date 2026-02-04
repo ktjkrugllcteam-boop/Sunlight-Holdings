@@ -39,15 +39,41 @@
 //   },
 // });
 
+// import { defineConfig } from 'vite';
+// import react from '@vitejs/plugin-react';
+// import tailwindcss from '@tailwindcss/vite';
+// import path from 'path';
+
+// export default defineConfig({
+  
+//   root: 'client',
+ 
+//   publicDir: 'public', 
+//   plugins: [
+//     react(),
+//     tailwindcss(),
+//   ],
+//   resolve: {
+//     alias: {
+     
+//       "@": path.resolve(__dirname, "./client/src"),
+//     },
+//   },
+//   build: {
+   
+//     outDir: '../dist',
+//     emptyOutDir: true,
+//   },
+// });
+
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig({
-  
   root: 'client',
- 
   publicDir: 'public', 
   plugins: [
     react(),
@@ -55,12 +81,21 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-     
       "@": path.resolve(__dirname, "./client/src"),
     },
   },
+  // START: ADD THIS SECTION TO FIX CORS
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000', // Points to your backend
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  },
+  // END: ADD THIS SECTION
   build: {
-   
     outDir: '../dist',
     emptyOutDir: true,
   },

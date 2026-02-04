@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Layout from "@/components/Layout";
@@ -11,38 +5,16 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
 
-
-type LocalizedContent = {
-  [key: string]: string;
-};
-
 type Property = {
   id: number;
-  title: LocalizedContent | string;
-  location: LocalizedContent | string;
-  description: LocalizedContent | string;
-  thumbImage: string; 
-};
-
-
-const parseJSON = (input: string) => {
-  try {
-    return JSON.parse(input);
-  } catch (e) {
-    return input;
-  }
-};
-
-const getLocalized = (content: LocalizedContent | string, language: string) => {
-  if (typeof content === "object" && content !== null) {
-
-    return (content as any)[language] || (content as any)["en"] || "";
-  }
-  return content;
+  title: string;
+  location: string;
+  description: string;
+  ThumbImage: string;
 };
 
 export default function Portfolio() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,23 +22,13 @@ export default function Portfolio() {
     const fetchProperties = async () => {
       try {
         const res = await fetch("http://localhost:3000/api/property/propertiesGet");
-
+        
         if (!res.ok) {
           throw new Error(`Error fetching properties: ${res.statusText}`);
         }
-
-        const rawData = await res.json();
-        
-      
-        const formattedData = rawData.map((item: any) => ({
-          id: item.id,
-          thumbImage: item.thumbImage, 
-          title: parseJSON(item.projectName),
-          location: parseJSON(item.location),
-          description: parseJSON(item.description),
-        }));
-
-        setProperties(formattedData);
+        const data = await res.json();
+        console.log("Fetch Properties Response:", data);
+        setProperties(data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -79,7 +41,7 @@ export default function Portfolio() {
 
   return (
     <Layout>
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-24">
         <div className="container">
           <motion.div
@@ -99,7 +61,7 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Properties List */}
+      {/* Properties */}
       <section className="pb-24 lg:pb-32">
         <div className="container">
           {loading ? (
@@ -114,16 +76,15 @@ export default function Portfolio() {
                 transition={{
                   duration: 0.8,
                   ease: "easeOut",
-                  delay: index * 0.1,
+                  delay: index * 0.1
                 }}
               >
-               
-                <Link href={`/portfolio/property?id=${property.id}`}>
+                <Link href={`/portfolio/platinum-edge?id=${property.id}`}>
                   <div className="group relative overflow-hidden cursor-pointer mb-10">
                     <div className="aspect-[21/9] overflow-hidden">
                       <img
                         src={property.thumbImage}
-                        alt={getLocalized(property.title, language) as string}
+                        alt={property.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/20 to-transparent" />
@@ -135,14 +96,14 @@ export default function Portfolio() {
                           <div className="flex items-center gap-2 text-[#2962ff] mb-3">
                             <MapPin size={16} />
                             <span className="font-display text-xs tracking-widest uppercase">
-                              {getLocalized(property.location, language)}
+                              {property.location}
                             </span>
                           </div>
                           <h2 className="font-serif text-3xl lg:text-4xl text-white mb-3">
-                            {getLocalized(property.title, language)}
+                            {property.title}
                           </h2>
                           <p className="text-white/60 max-w-xl">
-                            {getLocalized(property.description, language)}
+                            {property.description}
                           </p>
                         </div>
 
