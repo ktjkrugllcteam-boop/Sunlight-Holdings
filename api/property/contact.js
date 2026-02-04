@@ -18,7 +18,7 @@ import  withMiddleware  from "../Util/middleware.js";
   }
 
   try {
-    console.log("🟡 Backend received token:", recaptchaToken);
+    console.log(" Backend received token:", recaptchaToken);
 
     const verifyRes = await fetch(
       "https://www.google.com/recaptcha/api/siteverify",
@@ -32,7 +32,7 @@ import  withMiddleware  from "../Util/middleware.js";
     );
 
     const result = await verifyRes.json();
-    console.log("🟢 Google Verification Result:", result);
+    console.log("Google Verification Result:", result);
 
     if (!result.success || result.score < 0.5) {
       return res.status(403).json({

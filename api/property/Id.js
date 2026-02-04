@@ -309,9 +309,16 @@ import  withMiddleware  from "../Util/middleware.js";
       }
     }
      if (req.method === "DELETE") {
+
         if (!Id) {
           return res.status(400).json({ message: "Property ID is required" });
         }
+         try {
+      verifyAdmin(req);
+    } catch (error) {
+      return res.status(403).json({ message: error.message });
+    }
+  
 
         await connection.beginTransaction();
 
