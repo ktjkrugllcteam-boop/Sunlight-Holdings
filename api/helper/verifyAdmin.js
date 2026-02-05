@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export default function verifyAdmin(req) {
+ function verifyAdmin(req) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -33,3 +33,4 @@ export default function verifyAdmin(req) {
 
   return decoded;
 }
+export default verifyAdmin;

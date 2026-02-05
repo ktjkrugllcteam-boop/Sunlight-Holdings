@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import generator from "generate-password";
-export default async function handler(req, res) {
+import withMiddleware from "../Util/middleware.js";
+ async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -70,3 +71,5 @@ export default async function handler(req, res) {
     expiresIn: "1m",
   });
 }
+
+export default withMiddleware(handler);
