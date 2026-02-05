@@ -2,12 +2,12 @@ import jwt from "jsonwebtoken";
 
  function verifyAdmin(req) {
   const authHeader = req.headers.authorization;
-
+  console.log("Verifying admin with token:", authHeader);
   if (!authHeader) {
     throw new Error("Missing Authorization header");
   }
 
-  const token = authHeader.split(" ")[1]; 
+  const token = authHeader.trim().split(/\s+/)[1];
   if (!token) {
     throw new Error("Missing token");
   }

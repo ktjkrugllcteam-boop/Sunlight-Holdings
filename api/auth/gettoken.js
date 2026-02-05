@@ -63,12 +63,12 @@ import withMiddleware from "../Util/middleware.js";
   const token = jwt.sign(
     { role: "admin" },
     process.env.JWT_SECRET,
-    { expiresIn: "1m" }
+    { expiresIn: "30m" }
   );
 
   return res.status(200).json({
     token,
-    expiresIn: "1m",
+    expiresIn: "30m",
   });
 }
 
