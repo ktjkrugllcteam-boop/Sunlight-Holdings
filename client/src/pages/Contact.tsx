@@ -61,16 +61,16 @@ useEffect(() => {
 
   console.log("ALL ENV VARS:", import.meta.env);
   const key = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-  console.log("🔑 Loaded Site Key:", key ? "Present (starts with " + key.substring(0, 4) + ")" : "MISSING");
+  console.log(" Loaded Site Key:", key ? "Present (starts with " + key.substring(0, 4) + ")" : "MISSING");
 
   if (!key) {
-    console.error("❌ Missing VITE_RECAPTCHA_SITE_KEY. Check your .env file and restart server.");
+    console.error(" Missing VITE_RECAPTCHA_SITE_KEY. Check your .env file and restart server.");
     return;
   }
 
 
   if (document.getElementById("recaptcha-script")) {
-    console.log("🟢 reCAPTCHA script already appended");
+    console.log(" reCAPTCHA script already appended");
     return;
   }
 
@@ -81,11 +81,11 @@ useEffect(() => {
   script.defer = true;
 
   script.onload = () => {
-    console.log("🟢 reCAPTCHA script loaded successfully");
+    console.log(" reCAPTCHA script loaded successfully");
   };
 
   script.onerror = (err) => {
-    console.error("❌ Failed to load reCAPTCHA script:", err);
+    console.error(" Failed to load reCAPTCHA script:", err);
   };
 
   document.body.appendChild(script);
@@ -103,23 +103,23 @@ const handleSubmit = async (event) => {
   event.preventDefault();
   setStatus("submitting");
 
-  console.log("🟡 Form submit triggered");
+  console.log(" Form submit triggered");
 
   const formData = new FormData(event.currentTarget);
   const data = Object.fromEntries(formData.entries());
 
   try {
     if (!window.grecaptcha) {
-      console.error("❌ grecaptcha not available");
+      console.error(" grecaptcha not available");
       throw new Error("reCAPTCHA not loaded");
     }
 
-    console.log("🟡 Waiting for reCAPTCHA ready...");
+    console.log(" Waiting for reCAPTCHA ready...");
 
     const token = await new Promise((resolve, reject) => {
       window.grecaptcha.ready(async () => {
         try {
-          console.log("🟢 reCAPTCHA ready, executing...");
+          console.log(" reCAPTCHA ready, executing...");
           const token = await window.grecaptcha.execute(
             import.meta.env.VITE_RECAPTCHA_SITE_KEY,
             { action: "contact_form" }
@@ -131,15 +131,15 @@ const handleSubmit = async (event) => {
       });
     });
 
-    console.log("🟢 reCAPTCHA token received:", token);
+   
 
     if (!token) {
       throw new Error("Empty reCAPTCHA token");
     }
 
-    console.log("🟡 Sending request to API...");
+    console.log(" Sending request to API...");
 
-    const response = await fetch("http://localhost:3000/api/property/contact", {
+    const response = await fetch("/api/property/contact", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -150,20 +150,20 @@ const handleSubmit = async (event) => {
       }),
     });
 
-    console.log("🟡 API status:", response.status);
+
 
     if (!response.ok) {
       const err = await response.json();
-      console.error("❌ API error:", err);
+      console.error(" API error:", err);
       throw new Error(err.error || "API error");
     }
 
     const result = await response.json();
-    console.log("🟢 API success:", result);
+    console.log(" API success:", result);
 
     setStatus("success");
   } catch (err) {
-    console.error("❌ Submission error:", err);
+    console.error("Submission error:", err);
     setStatus("error");
     setErrorMessage(err.message || "Network error");
   }
