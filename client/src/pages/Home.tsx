@@ -140,7 +140,7 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Link href="/portfolio/platinum-edge">
+            <Link href="/portfolio/property?id=90001">
               <div className="group relative overflow-hidden cursor-pointer">
                 {/* Image */}
                 <div className="aspect-[16/9] overflow-hidden">
