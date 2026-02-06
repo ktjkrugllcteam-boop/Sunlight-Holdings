@@ -13,12 +13,13 @@
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import Layout from '@/components/Layout';
-import { Link } from 'wouter';
+import { Link,useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { ArrowRight, ChevronDown, Sparkles, Target, Clock } from 'lucide-react';
 
 export default function Home() {
   const { t } = useLanguage();
+  const [, navigate] = useLocation();
 
   return (
     <Layout>
@@ -141,8 +142,11 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Link href="/portfolio/property?id=90001">
-              <div className="group relative overflow-hidden cursor-pointer">
+            {/* <Link href="/portfolio/property?id=90001"> */}
+              <div 
+                 onClick={() => navigate("/portfolio/property?id=90001")}
+                
+                className="group relative overflow-hidden cursor-pointer">
                 {/* Image */}
                 <div className="aspect-[16/9] overflow-hidden">
                   <img
@@ -177,7 +181,7 @@ export default function Home() {
                 {/* Glow border on hover */}
                 <div className="absolute inset-0 border border-[#2962ff]/0 group-hover:border-[#2962ff]/30 transition-colors duration-500" />
               </div>
-            </Link>
+            {/* </Link> */}
           </motion.div>
 
           {/* View All Link */}
