@@ -10,6 +10,7 @@
  * 6. Contact CTA - Partnership inquiry prompt
  */
 
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import Layout from '@/components/Layout';
 import { Link } from 'wouter';
