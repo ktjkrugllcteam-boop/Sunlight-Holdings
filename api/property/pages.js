@@ -1,5 +1,6 @@
 import mysql from "mysql2/promise";
 import  withMiddleware  from "../Util/middleware.js";
+import verifyAdmin from "../helper/verifyAdmin.js";
 async function handler(req, res) {
     try {
       verifyAdmin(req);
