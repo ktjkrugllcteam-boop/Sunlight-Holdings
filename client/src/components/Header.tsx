@@ -75,7 +75,7 @@ export default function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-8">
+            <div className="hidden xl:flex items-center gap-8">
               {navItems.map((item) => (
                 <Link key={item.href} href={item.href}>
                   <motion.span
@@ -129,7 +129,7 @@ export default function Header() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 text-white/80 hover:text-white transition-colors"
+                className="xl:hidden p-2 text-white/80 hover:text-white transition-colors"
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -146,7 +146,7 @@ export default function Header() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 lg:hidden"
+            className="fixed inset-0 z-40 xl:hidden"
           >
             <div
               className="absolute inset-0 bg-[#0a0f1a]/98 backdrop-blur-lg"

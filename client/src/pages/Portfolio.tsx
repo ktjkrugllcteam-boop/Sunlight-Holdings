@@ -21,7 +21,7 @@ type Property = {
   title: LocalizedContent | string;
   location: LocalizedContent | string;
   description: LocalizedContent | string;
-  thumbImage: string; 
+  thumbImage: string;
 };
 
 
@@ -56,11 +56,11 @@ export default function Portfolio() {
         }
 
         const rawData = await res.json();
-        
-      
+
+
         const formattedData = rawData.map((item: any) => ({
           id: item.id,
-          thumbImage: item.thumbImage, 
+          thumbImage: item.thumbImage,
           title: parseJSON(item.projectName),
           location: parseJSON(item.location),
           description: parseJSON(item.description),
@@ -117,45 +117,55 @@ export default function Portfolio() {
                   delay: index * 0.1,
                 }}
               >
-               
+
                 <Link href={`/portfolio/property?id=${property.id}`}>
                   <div className="group relative overflow-hidden cursor-pointer mb-10">
-                    <div className="aspect-[21/9] overflow-hidden">
+                    <div className="aspect-[15/9] lg:aspect-[21/9] overflow-hidden">
                       <img
                         src={property.thumbImage}
                         alt={getLocalized(property.title, language) as string}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/30 to-transparent" />
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
-                      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                
+                    <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-12">
+                      <div className="flex items-center justify-between lg:items-end lg:justify-between gap-4">
+
                         <div>
-                          <div className="flex items-center gap-2 text-[#2962ff] mb-3">
+                      
+                          <div className="flex items-center gap-2 text-[#2962ff] mb-0 lg:mb-3">
                             <MapPin size={16} />
                             <span className="font-display text-xs tracking-widest uppercase">
                               {getLocalized(property.location, language)}
                             </span>
                           </div>
-                          <h2 className="font-serif text-3xl lg:text-4xl text-white mb-3">
-                            {getLocalized(property.title, language)}
-                          </h2>
-                          <p className="text-white/60 max-w-xl">
-                            {getLocalized(property.description, language)}
-                          </p>
+
+                        
+                          <div className="hidden lg:block">
+                            <h2 className="font-serif text-3xl text-white mb-3">
+                              {getLocalized(property.title, language)}
+                            </h2>
+                            <p className="text-white/60 max-w-xl">
+                              {getLocalized(property.description, language)}
+                            </p>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[#d4af37] font-display text-sm tracking-wider uppercase group-hover:gap-4 transition-all shrink-0">
+                   
+                        <div className="flex items-center gap-2 text-[#d4af37] font-display text-xs lg:text-sm tracking-wider uppercase group-hover:gap-4 transition-all shrink-0">
                           {t("portfolio.viewDetails")}
-                          <ArrowRight size={18} />
+                          <ArrowRight size={16} />
                         </div>
+
                       </div>
                     </div>
 
                     <div className="absolute inset-0 border border-[#2962ff]/0 group-hover:border-[#2962ff]/30 transition-colors duration-500" />
                   </div>
                 </Link>
+
               </motion.div>
             ))
           )}

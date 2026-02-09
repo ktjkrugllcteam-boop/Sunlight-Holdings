@@ -143,41 +143,53 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <Link href="/portfolio/property?id=90001">
-              <div className="group relative overflow-hidden cursor-pointer">
-                {/* Image */}
-                <div className="aspect-[16/9] overflow-hidden">
-                  <img
-                    src="/images/hero-abstract-2.jpg"
-                    alt="Platinum Edge"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/30 to-transparent" />
-                </div>
+           <div className="group relative overflow-hidden cursor-pointer mb-10">
+  {/* Image Container - Updated Aspect Ratio to match dynamic */}
+  <div className="aspect-[15/9] lg:aspect-[21/9] overflow-hidden">
+    <img
+      src="/images/hero-abstract-2.jpg"
+      alt="Platinum Edge"
+      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/30 to-transparent" />
+  </div>
 
-                {/* Content Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
-                  <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-                    <div>
-                      <span className="font-display text-xs tracking-widest uppercase text-[#2962ff] mb-2 block">
-                        Almadies, Dakar
-                      </span>
-                      <h3 className="font-serif text-2xl lg:text-3xl text-white mb-3">
-                        Platinum Edge
-                      </h3>
-                      <p className="text-white/60 max-w-md">
-                        {t('portfolio.platinum.description')}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#d4af37] font-display text-sm tracking-wider uppercase group-hover:gap-4 transition-all">
-                      {t('portfolio.viewDetails')}
-                      <ArrowRight size={18} />
-                    </div>
-                  </div>
-                </div>
+  {/* CONTENT OVERLAY */}
+  <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-12">
+    <div className="flex items-center justify-between lg:items-end lg:justify-between gap-4">
+      
+      {/* LEFT CONTENT */}
+      <div>
+        {/* Location – added MapPin and matching styles */}
+        <div className="flex items-center gap-2 text-[#2962ff] mb-0 lg:mb-3">
+         
+          <span className="font-display text-xs tracking-widest uppercase">
+            Almadies, Dakar
+          </span>
+        </div>
 
-                {/* Glow border on hover */}
-                <div className="absolute inset-0 border border-[#2962ff]/0 group-hover:border-[#2962ff]/30 transition-colors duration-500" />
-              </div>
+        {/* Title + Description – desktop only now (hidden lg:block) */}
+        <div className="hidden lg:block">
+          <h2 className="font-serif text-3xl text-white mb-3">
+            Platinum Edge
+          </h2>
+          <p className="text-white/60 max-w-xl">
+            {t('portfolio.platinum.description')}
+          </p>
+        </div>
+      </div>
+
+      {/* View Details – Updated size and shrink prop */}
+      <div className="flex items-center gap-2 text-[#d4af37] font-display text-xs lg:text-sm tracking-wider uppercase group-hover:gap-4 transition-all shrink-0">
+        {t('portfolio.viewDetails')}
+        <ArrowRight size={16} />
+      </div>
+    </div>
+  </div>
+
+  {/* Glow border on hover */}
+  <div className="absolute inset-0 border border-[#2962ff]/0 group-hover:border-[#2962ff]/30 transition-colors duration-500" />
+</div>
             </Link>
           </motion.div>
 
