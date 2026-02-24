@@ -1,11 +1,60 @@
-import  withMiddleware  from "../Util/middleware.js";
- async function handler(req, res) {
+// import  withMiddleware  from "../Util/middleware.js";
+//  async function handler(req, res) {
 
 
+//   if (req.method === "OPTIONS") {
+//     return res.status(200).end();
+//   }
+
+
+//   if (req.method !== "POST") {
+//     return res.status(405).json({ error: "Method not allowed" });
+//   }
+
+//   const { recaptchaToken, ...formData } = req.body;
+
+//   if (!recaptchaToken) {
+//     return res.status(400).json({ error: "Missing reCAPTCHA token" });
+//   }
+
+//   try {
+//     console.log(" Backend received token:", recaptchaToken);
+
+//     const verifyRes = await fetch(
+//       "https://www.google.com/recaptcha/api/siteverify",
+//       {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/x-www-form-urlencoded",
+//         },
+//         body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`,
+//       }
+//     );
+
+//     const result = await verifyRes.json();
+//     console.log("Google Verification Result:", result);
+
+//     if (!result.success || result.score < 0.5) {
+//       return res.status(403).json({
+//         error: "reCAPTCHA verification failed",
+//         score: result.score,
+//       });
+//     }
+
+//     return res.status(200).json({ success: true });
+//   } catch (err) {
+//     console.error("API error:", err);
+//     return res.status(500).json({ error: "Server error" });
+//   }
+// }
+
+// export default withMiddleware(handler);
+import withMiddleware from "../Util/middleware.js";
+
+async function handler(req, res) {
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -41,7 +90,29 @@ import  withMiddleware  from "../Util/middleware.js";
       });
     }
 
+
+
+    const formspreeRes = await fetch(process.env.FormSpree, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json" 
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!formspreeRes.ok) {
+      const formspreeError = await formspreeRes.json();
+      console.error("Formspree Error:", formspreeError);
+      return res.status(formspreeRes.status).json({ 
+        error: "Formspree submission failed", 
+        details: formspreeError 
+      });
+    }
+
+    
     return res.status(200).json({ success: true });
+
   } catch (err) {
     console.error("API error:", err);
     return res.status(500).json({ error: "Server error" });
@@ -49,7 +120,6 @@ import  withMiddleware  from "../Util/middleware.js";
 }
 
 export default withMiddleware(handler);
-
 
 // import type { NextApiRequest, NextApiResponse } from "next";
 // import withMiddleware from "../Util/middleware.js";
