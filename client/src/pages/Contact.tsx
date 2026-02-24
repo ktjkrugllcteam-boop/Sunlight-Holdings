@@ -60,7 +60,7 @@ export default function Contact() {
 
 useEffect(() => {
 
-  console.log("ALL ENV VARS:", import.meta.env);
+  
   const key = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   console.log(" Loaded Site Key:", key ? "Present (starts with " + key.substring(0, 4) + ")" : "MISSING");
 
